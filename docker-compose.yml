@@ -1,0 +1,32 @@
+meteor:
+  build: meteor
+  ports:
+   - "80:3000"
+  links:
+   - mongo:mongo-dev
+  environment:
+   - MONGO_URL=mongodb://mongo-dev/giggl
+   - ROOT_URL=http://yourapp.com
+   - MAIL_URL=smtp://some.mailserver.com:25
+   - DELAY=3
+   - PORT=3000
+   - METEOR_SETTINGS={"public":{},"AWSAccessKeyId":"AKIAJR42GLQSSKD7SZYQ","AWSSecretAccessKey":"eVy5NH2NCqThQhkmHeZD9HIUmV6PQ9blAKU/yB0p","AWSRegion":"us-west-2"}
+
+mongo:
+  image: mongo
+
+spark_master:
+ image: segy/docker-spark
+ container_name: spark_master
+ command: /usr/local/spark/sbin/start-master.sh --properties-file /spark-defaults.conf -i "`awk 'NR==1 {print $1}' /etc/hosts`"
+ ports:
+  - "7077:7077"
+  - "8080:8080"
+  environment:
+  - SPARK_MASTER_IP="`awk 'NR==1 {print $1}' /etc/hosts`"
+
+spark_slave:
+ image: segy/docker-spark
+ command: /bin/bash
+ links:
+  - spark_master:spark_master
