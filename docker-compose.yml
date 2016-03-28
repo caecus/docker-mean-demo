@@ -1,10 +1,14 @@
-mongo:
+db:
   image: mongo
 
-node:
+web:
   build: web
+  volumes:
+    - ./web:/var/www/example.com/api
   ports:
-   - "80:8080"
+    - "3000:3000"
   links:
-   - mongo:mongo-dev
-  container_name: web
+    - db
+  environment:
+    - PORT=3000
+    - APP=app.js
