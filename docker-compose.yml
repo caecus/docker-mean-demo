@@ -1,14 +1,47 @@
-db:
-  image: mongo
+nginx:
+    build: lb
+    links:
+        - web1:web1
+        - web2:web2
+        - web3:web3
+    ports:
+        - "80:80"
 
-web:
+web1:
   build: web
   volumes:
-    - ./web:/var/www/example.com/api
+    - ./web:/var/www/test
   ports:
-    - "3000:3000"
+    - "3000"
   links:
     - db
   environment:
     - PORT=3000
-    - APP=app.js
+    - APP=bin/www
+
+web2:
+  build: web
+  volumes:
+    - ./web:/var/www/test
+  ports:
+    - "3000"
+  links:
+    - db
+  environment:
+    - PORT=3000
+    - APP=bin/www
+
+web3:
+  build: web
+  volumes:
+    - ./web:/var/www/test
+  ports:
+    - "3000"
+  links:
+    - db
+  environment:
+    - PORT=3000
+    - APP=bin/www
+
+db:
+  image: mongo

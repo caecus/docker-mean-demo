@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <title>Todo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet -->
+  <link rel="stylesheet" href="/scripts/angular-material/angular-material.css">
+</head>
+<body>
+
+<ng-view></ng-view>
+
+<!-- Libraries -->
+<script src="/scripts/angular/angular.min.js"></script>
+<script src="/scripts/angular-animate/angular-animate.min.js"></script>
+<script src="/scripts/angular-aria/angular-aria.min.js"></script>
+<script src="/scripts/angular-messages/angular-messages.min.js"></script>
+<script src="/scripts/angular-route/angular-route.min.js"></script>
+<script src="/scripts/angular-resource/angular-resource.min.js"></script>
+
+<!-- Angular Material Library -->
+<script src="/scripts/angular-material/angular-material.min.js"></script>
+
+<!-- Template -->
+<script type="text/ng-template" id="/todos.html">
+  <md-toolbar class="md-theme-light">
+    <h2 class="md-toolbar-tools">
+      <span>Todo List</span>
+    </h2>
+  </md-toolbar>
+  <md-content>
+    <md-input-container md-no-float class="md-block">
+      <md-icon md-svg-src="/images/icons/ic_search_black_24px.svg"></md-icon>
+      <input ng-model="search.name" type="text" placeholder="Search">
+    </md-input-container>
+    <md-list-item ng-repeat="todo in todos | filter: search">
+      <md-checkbox ng-model="todo.completed" ng-change="update($index)"></md-checkbox>
+      <p>{{todo.name}}</p>
+      <md-icon md-svg-icon="/images/icons/ic_mode_edit_black_24px.svg" ng-click="edit($index)"></md-icon>
+      <md-icon md-svg-icon="/images/icons/ic_delete_black_24px.svg" ng-click="remove($index)"></md-icon>
+    </md-list-item>
+    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
+      <md-input-container>
+        <label>New task</label>
+        <input ng-model="newTodo">
+      </md-input-container>
+      <md-button class="md-fab" aria-label="Photos with Tooltip Delay" style="margin-top: -24px;" ng-click="save()">
+        <md-icon md-svg-src="/images/icons/ic_add_white_24px.svg" style="width: 24px; height: 24px; "></md-icon>
+        <md-tooltip md-delay="0">Add todo</md-tooltip>
+      </md-button>
+    </section>
+  </md-content>
+</script>
+
+
+<script type="text/ng-template" id="/todoDetails.html">
+  <md-toolbar class="md-theme-light">
+    <h2 class="md-toolbar-tools">
+      <span>Todo List</span>
+    </h2>
+  </md-toolbar>
+  <md-content>
+    <div layout-gt-sm="row">
+      <md-checkbox ng-model="todo.completed" class="md-block"></md-checkbox>
+      <md-input-container class="md-block" flex-gt-sm>
+        <input ng-model="todo.name" placeholder="Name">
+      </md-input-container>
+    </div>
+    <md-input-container class="md-block">
+      <label>Note</label>
+      <textarea ng-model="todo.note" md-maxlength="150" rows="5" md-select-on-focus></textarea>
+    </md-input-container>
+    <div layout-gt-sm="row">
+      <md-button class="md-raised md-primary" ng-click="update()">Update</md-button>
+      <md-button class="md-raised md-warn" ng-click="remove()">Remove</md-button>
+      <md-button md-no-ink class="md-primary" ng-href="/#/">Cancel</md-button>
+    </div>
+  </md-content>
+</script>
+
+<script>
+  angular.module('app', ['ngMaterial', 'ngRoute', 'ngResource'])
+
+    //---------------
+    // Services
+    //---------------
+    .factory('Todos', ['$resource', function($resource){
+      return $resource('/todos/:id', null, {
+        'update': { method:'PUT' }
+      });
+    }])
+
+    //---------------
+    // Controllers
+    //---------------
+    .controller('TodoController', ['$scope', '$location', 'Todos', function ($scope, $location, Todos) {
+      $scope.editing = [];
+      $scope.todos = Todos.query();
+
+      $scope.save = function(){
+        if(!$scope.newTodo || $scope.newTodo.length < 1) return;
+        var todo = new Todos({ name: $scope.newTodo, completed: false });
+
+        todo.$save(function(){
+          $scope.todos.push(todo);
+          $scope.newTodo = ''; // clear textbox
+        });
+      }
+
+      $scope.update = function(index){
+        var todo = $scope.todos[index];
+        Todos.update({id: todo._id}, todo);
+        $scope.editing[index] = false;
+      }
+
+      $scope.edit = function(index){
+        $location.path( '/' + $scope.todos[index]._id );
+      }
+
+      $scope.cancel = function(index){
+        $scope.todos[index] = angular.copy($scope.editing[index]);
+        $scope.editing[index] = false;
+      }
+
+      $scope.remove = function(index){
+        var todo = $scope.todos[index];
+        Todos.remove({id: todo._id}, function(){
+          $scope.todos.splice(index, 1);
+        });
+      }
+    }])
+
+    .controller('TodoDetailCtrl', ['$scope', '$routeParams', 'Todos', '$location', function ($scope, $routeParams, Todos, $location) {
+      $scope.todo = Todos.get({id: $routeParams.id });
+
+      $scope.update = function(){
+        Todos.update({id: $scope.todo._id}, $scope.todo, function(){
+          $location.url('/');
+        });
+      }
+
+      $scope.remove = function(){
+        Todos.remove({id: $scope.todo._id}, function(){
+          $location.url('/');
+        });
+      }
+    }])
+    //---------------
+    // Routes
+    //---------------
+    .config(['$routeProvider', function ($routeProvider) {
+      $routeProvider
+        .when('/', {
+          templateUrl: '/todos.html',
+          controller: 'TodoController'
+        })
+        .when('/:id', {
+          templateUrl: '/todoDetails.html',
+          controller: 'TodoDetailCtrl'
+       });
+    }]);
+</script>
+
+</body>
+</html>

@@ -1,12 +1,25 @@
 {
-  "name": "test",
-  "version": "1.0.0",
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "nodejs ./bin/www"
   },
   "dependencies": {
-    "express": "^4.13.4",
-    "body-parser": "^1.12.4",
-    "lodash": "^3.10.0"
+    "angular": "^1.5.3",
+    "angular-animate": "^1.5.3",
+    "angular-aria": "^1.5.3",
+    "angular-material": "^1.0.6",
+    "angular-messages": "^1.5.3",
+    "angular-resource": "^1.5.3",
+    "angular-route": "^1.5.3",
+    "body-parser": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "debug": "~0.7.4",
+    "ejs": "~0.8.5",
+    "express": "~4.0.0",
+    "mongoose": "^4.4.10",
+    "morgan": "~1.0.0",
+    "static-favicon": "~1.0.0"
   }
 }
