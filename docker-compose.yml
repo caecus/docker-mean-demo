@@ -9,8 +9,6 @@ nginx:
 
 web1:
   build: web
-  volumes:
-    - ./web:/var/www/test
   ports:
     - "3000"
   links:
@@ -21,8 +19,6 @@ web1:
 
 web2:
   build: web
-  volumes:
-    - ./web:/var/www/test
   ports:
     - "3000"
   links:
@@ -33,8 +29,6 @@ web2:
 
 web3:
   build: web
-  volumes:
-    - ./web:/var/www/test
   ports:
     - "3000"
   links:
